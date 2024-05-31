@@ -11,6 +11,15 @@ import {
   import { EmeraldBtn} from "./../../styles/Button.tsx";
   import "./../../styles/Layout.css";
   const Top = () => {
+  
+    const SignIn_Clickhandler=()=>{
+  
+    }
+  
+    const SignUp_Clickhandler=()=>{
+      
+    }
+  
     return (
       <MantineProvider>
         <div className="app">
@@ -21,24 +30,17 @@ import {
             <nav className="sidebar">
               <h2>Sidebar</h2>
               <ul>
-                <li>
-                  <Button style={EmeraldBtn}>Item 1</Button>
-                </li>
-                <li>
-                  <Button style={EmeraldBtn}>Item 2</Button>
-                </li>
-                <li>
-                  <Button style={EmeraldBtn}>Item 3</Button>
-                </li>
               </ul>
             </nav>
             <div className="content">
               <div className="maincontenttitle">
-                <h2>ようこそ!!</h2>
+                <h2>ようこそ!!
                 <p>新規作成の場合はサインアップを、</p>
                 <p>アカウントをお持ちの場合はサインインをお選びください。</p>
+                </h2>
               </div>
-              
+              <Button style={EmeraldBtn} onClick={SignIn_Clickhandler} >サインイン</Button>
+              <Button style={EmeraldBtn} onClick={SignUp_Clickhandler}>サインアップ</Button>
   
             </div>
           </div>
