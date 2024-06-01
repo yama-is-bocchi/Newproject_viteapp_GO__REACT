@@ -3,6 +3,7 @@ package main
 import (
 	"Ebook/ent"
 	"Ebook/Sign_Methods"
+	"Ebook/Structs"
 	"Ebook/Token_Methods"
 	"context"
 	"github.com/gin-gonic/gin"
@@ -33,9 +34,12 @@ func main() {
 		})
 	})
 
+	//グローバル変数に代入
+	structs.Client=client
+
 	// CORS設定
 	router.Use(func(c *gin.Context) {
-		c.Writer.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
+		c.Writer.Header().Set("Access-Control-Allow-Origin", "http://localhost:5173")
 		c.Writer.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS")
 		c.Writer.Header().Set("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization")
 		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
