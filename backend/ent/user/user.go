@@ -24,6 +24,8 @@ const (
 	EdgeLocks = "locks"
 	// EdgeTokens holds the string denoting the tokens edge name in mutations.
 	EdgeTokens = "tokens"
+	// EdgeWantlists holds the string denoting the wantlists edge name in mutations.
+	EdgeWantlists = "wantlists"
 	// Table holds the table name of the user in the database.
 	Table = "users"
 	// BooksTable is the table that holds the books relation/edge.
@@ -54,6 +56,13 @@ const (
 	TokensInverseTable = "tokens"
 	// TokensColumn is the table column denoting the tokens relation/edge.
 	TokensColumn = "user_id"
+	// WantlistsTable is the table that holds the wantlists relation/edge.
+	WantlistsTable = "wantlists"
+	// WantlistsInverseTable is the table name for the Wantlist entity.
+	// It exists in this package in order to avoid circular dependency with the "wantlist" package.
+	WantlistsInverseTable = "wantlists"
+	// WantlistsColumn is the table column denoting the wantlists relation/edge.
+	WantlistsColumn = "user_id"
 )
 
 // Columns holds all SQL columns for user fields.
@@ -151,6 +160,20 @@ func ByTokens(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newTokensStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// ByWantlistsCount orders the results by wantlists count.
+func ByWantlistsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newWantlistsStep(), opts...)
+	}
+}
+
+// ByWantlists orders the results by wantlists terms.
+func ByWantlists(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newWantlistsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newBooksStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -177,5 +200,12 @@ func newTokensStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(TokensInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, TokensTable, TokensColumn),
+	)
+}
+func newWantlistsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(WantlistsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, WantlistsTable, WantlistsColumn),
 	)
 }

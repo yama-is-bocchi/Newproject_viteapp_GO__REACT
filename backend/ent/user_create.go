@@ -8,6 +8,7 @@ import (
 	"Ebook/ent/miss"
 	"Ebook/ent/token"
 	"Ebook/ent/user"
+	"Ebook/ent/wantlist"
 	"context"
 	"errors"
 	"fmt"
@@ -93,6 +94,21 @@ func (uc *UserCreate) AddTokens(t ...*Token) *UserCreate {
 		ids[i] = t[i].ID
 	}
 	return uc.AddTokenIDs(ids...)
+}
+
+// AddWantlistIDs adds the "wantlists" edge to the Wantlist entity by IDs.
+func (uc *UserCreate) AddWantlistIDs(ids ...int) *UserCreate {
+	uc.mutation.AddWantlistIDs(ids...)
+	return uc
+}
+
+// AddWantlists adds the "wantlists" edges to the Wantlist entity.
+func (uc *UserCreate) AddWantlists(w ...*Wantlist) *UserCreate {
+	ids := make([]int, len(w))
+	for i := range w {
+		ids[i] = w[i].ID
+	}
+	return uc.AddWantlistIDs(ids...)
 }
 
 // Mutation returns the UserMutation object of the builder.
@@ -231,6 +247,22 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(token.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := uc.mutation.WantlistsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.WantlistsTable,
+			Columns: []string{user.WantlistsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(wantlist.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

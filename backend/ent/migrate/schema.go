@@ -104,6 +104,26 @@ var (
 		Columns:    UsersColumns,
 		PrimaryKey: []*schema.Column{UsersColumns[0]},
 	}
+	// WantlistsColumns holds the columns for the "wantlists" table.
+	WantlistsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "title", Type: field.TypeString},
+		{Name: "user_id", Type: field.TypeInt},
+	}
+	// WantlistsTable holds the schema information for the "wantlists" table.
+	WantlistsTable = &schema.Table{
+		Name:       "wantlists",
+		Columns:    WantlistsColumns,
+		PrimaryKey: []*schema.Column{WantlistsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "wantlists_users_wantlists",
+				Columns:    []*schema.Column{WantlistsColumns[2]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		BooksTable,
@@ -111,6 +131,7 @@ var (
 		MissesTable,
 		TokensTable,
 		UsersTable,
+		WantlistsTable,
 	}
 )
 
@@ -119,4 +140,5 @@ func init() {
 	LocksTable.ForeignKeys[0].RefTable = UsersTable
 	MissesTable.ForeignKeys[0].RefTable = UsersTable
 	TokensTable.ForeignKeys[0].RefTable = UsersTable
+	WantlistsTable.ForeignKeys[0].RefTable = UsersTable
 }

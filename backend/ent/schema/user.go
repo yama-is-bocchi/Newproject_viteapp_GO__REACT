@@ -29,5 +29,6 @@ func (User) Edges() []ent.Edge {
 			edge.To("misses", Miss.Type),
 			edge.To("locks", Lock.Type),
 			edge.To("tokens", Token.Type),
+			edge.To("wantlists", Wantlist.Type),
 		}
 }

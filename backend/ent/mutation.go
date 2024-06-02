@@ -9,6 +9,7 @@ import (
 	"Ebook/ent/predicate"
 	"Ebook/ent/token"
 	"Ebook/ent/user"
+	"Ebook/ent/wantlist"
 	"context"
 	"errors"
 	"fmt"
@@ -28,11 +29,12 @@ const (
 	OpUpdateOne = ent.OpUpdateOne
 
 	// Node types.
-	TypeBook  = "Book"
-	TypeLock  = "Lock"
-	TypeMiss  = "Miss"
-	TypeToken = "Token"
-	TypeUser  = "User"
+	TypeBook     = "Book"
+	TypeLock     = "Lock"
+	TypeMiss     = "Miss"
+	TypeToken    = "Token"
+	TypeUser     = "User"
+	TypeWantlist = "Wantlist"
 )
 
 // BookMutation represents an operation that mutates the Book nodes in the graph.
@@ -2068,27 +2070,30 @@ func (m *TokenMutation) ResetEdge(name string) error {
 // UserMutation represents an operation that mutates the User nodes in the graph.
 type UserMutation struct {
 	config
-	op            Op
-	typ           string
-	id            *int
-	name          *string
-	password      *string
-	clearedFields map[string]struct{}
-	books         map[int]struct{}
-	removedbooks  map[int]struct{}
-	clearedbooks  bool
-	misses        map[int]struct{}
-	removedmisses map[int]struct{}
-	clearedmisses bool
-	locks         map[int]struct{}
-	removedlocks  map[int]struct{}
-	clearedlocks  bool
-	tokens        map[int]struct{}
-	removedtokens map[int]struct{}
-	clearedtokens bool
-	done          bool
-	oldValue      func(context.Context) (*User, error)
-	predicates    []predicate.User
+	op               Op
+	typ              string
+	id               *int
+	name             *string
+	password         *string
+	clearedFields    map[string]struct{}
+	books            map[int]struct{}
+	removedbooks     map[int]struct{}
+	clearedbooks     bool
+	misses           map[int]struct{}
+	removedmisses    map[int]struct{}
+	clearedmisses    bool
+	locks            map[int]struct{}
+	removedlocks     map[int]struct{}
+	clearedlocks     bool
+	tokens           map[int]struct{}
+	removedtokens    map[int]struct{}
+	clearedtokens    bool
+	wantlists        map[int]struct{}
+	removedwantlists map[int]struct{}
+	clearedwantlists bool
+	done             bool
+	oldValue         func(context.Context) (*User, error)
+	predicates       []predicate.User
 }
 
 var _ ent.Mutation = (*UserMutation)(nil)
@@ -2477,6 +2482,60 @@ func (m *UserMutation) ResetTokens() {
 	m.removedtokens = nil
 }
 
+// AddWantlistIDs adds the "wantlists" edge to the Wantlist entity by ids.
+func (m *UserMutation) AddWantlistIDs(ids ...int) {
+	if m.wantlists == nil {
+		m.wantlists = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.wantlists[ids[i]] = struct{}{}
+	}
+}
+
+// ClearWantlists clears the "wantlists" edge to the Wantlist entity.
+func (m *UserMutation) ClearWantlists() {
+	m.clearedwantlists = true
+}
+
+// WantlistsCleared reports if the "wantlists" edge to the Wantlist entity was cleared.
+func (m *UserMutation) WantlistsCleared() bool {
+	return m.clearedwantlists
+}
+
+// RemoveWantlistIDs removes the "wantlists" edge to the Wantlist entity by IDs.
+func (m *UserMutation) RemoveWantlistIDs(ids ...int) {
+	if m.removedwantlists == nil {
+		m.removedwantlists = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.wantlists, ids[i])
+		m.removedwantlists[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedWantlists returns the removed IDs of the "wantlists" edge to the Wantlist entity.
+func (m *UserMutation) RemovedWantlistsIDs() (ids []int) {
+	for id := range m.removedwantlists {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// WantlistsIDs returns the "wantlists" edge IDs in the mutation.
+func (m *UserMutation) WantlistsIDs() (ids []int) {
+	for id := range m.wantlists {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetWantlists resets all changes to the "wantlists" edge.
+func (m *UserMutation) ResetWantlists() {
+	m.wantlists = nil
+	m.clearedwantlists = false
+	m.removedwantlists = nil
+}
+
 // Where appends a list predicates to the UserMutation builder.
 func (m *UserMutation) Where(ps ...predicate.User) {
 	m.predicates = append(m.predicates, ps...)
@@ -2627,7 +2686,7 @@ func (m *UserMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *UserMutation) AddedEdges() []string {
-	edges := make([]string, 0, 4)
+	edges := make([]string, 0, 5)
 	if m.books != nil {
 		edges = append(edges, user.EdgeBooks)
 	}
@@ -2639,6 +2698,9 @@ func (m *UserMutation) AddedEdges() []string {
 	}
 	if m.tokens != nil {
 		edges = append(edges, user.EdgeTokens)
+	}
+	if m.wantlists != nil {
+		edges = append(edges, user.EdgeWantlists)
 	}
 	return edges
 }
@@ -2671,13 +2733,19 @@ func (m *UserMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case user.EdgeWantlists:
+		ids := make([]ent.Value, 0, len(m.wantlists))
+		for id := range m.wantlists {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *UserMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 4)
+	edges := make([]string, 0, 5)
 	if m.removedbooks != nil {
 		edges = append(edges, user.EdgeBooks)
 	}
@@ -2689,6 +2757,9 @@ func (m *UserMutation) RemovedEdges() []string {
 	}
 	if m.removedtokens != nil {
 		edges = append(edges, user.EdgeTokens)
+	}
+	if m.removedwantlists != nil {
+		edges = append(edges, user.EdgeWantlists)
 	}
 	return edges
 }
@@ -2721,13 +2792,19 @@ func (m *UserMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case user.EdgeWantlists:
+		ids := make([]ent.Value, 0, len(m.removedwantlists))
+		for id := range m.removedwantlists {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *UserMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 4)
+	edges := make([]string, 0, 5)
 	if m.clearedbooks {
 		edges = append(edges, user.EdgeBooks)
 	}
@@ -2739,6 +2816,9 @@ func (m *UserMutation) ClearedEdges() []string {
 	}
 	if m.clearedtokens {
 		edges = append(edges, user.EdgeTokens)
+	}
+	if m.clearedwantlists {
+		edges = append(edges, user.EdgeWantlists)
 	}
 	return edges
 }
@@ -2755,6 +2835,8 @@ func (m *UserMutation) EdgeCleared(name string) bool {
 		return m.clearedlocks
 	case user.EdgeTokens:
 		return m.clearedtokens
+	case user.EdgeWantlists:
+		return m.clearedwantlists
 	}
 	return false
 }
@@ -2783,6 +2865,446 @@ func (m *UserMutation) ResetEdge(name string) error {
 	case user.EdgeTokens:
 		m.ResetTokens()
 		return nil
+	case user.EdgeWantlists:
+		m.ResetWantlists()
+		return nil
 	}
 	return fmt.Errorf("unknown User edge %s", name)
+}
+
+// WantlistMutation represents an operation that mutates the Wantlist nodes in the graph.
+type WantlistMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *int
+	title         *string
+	clearedFields map[string]struct{}
+	user          *int
+	cleareduser   bool
+	done          bool
+	oldValue      func(context.Context) (*Wantlist, error)
+	predicates    []predicate.Wantlist
+}
+
+var _ ent.Mutation = (*WantlistMutation)(nil)
+
+// wantlistOption allows management of the mutation configuration using functional options.
+type wantlistOption func(*WantlistMutation)
+
+// newWantlistMutation creates new mutation for the Wantlist entity.
+func newWantlistMutation(c config, op Op, opts ...wantlistOption) *WantlistMutation {
+	m := &WantlistMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeWantlist,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withWantlistID sets the ID field of the mutation.
+func withWantlistID(id int) wantlistOption {
+	return func(m *WantlistMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *Wantlist
+		)
+		m.oldValue = func(ctx context.Context) (*Wantlist, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().Wantlist.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withWantlist sets the old Wantlist of the mutation.
+func withWantlist(node *Wantlist) wantlistOption {
+	return func(m *WantlistMutation) {
+		m.oldValue = func(context.Context) (*Wantlist, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m WantlistMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m WantlistMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *WantlistMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *WantlistMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().Wantlist.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetTitle sets the "title" field.
+func (m *WantlistMutation) SetTitle(s string) {
+	m.title = &s
+}
+
+// Title returns the value of the "title" field in the mutation.
+func (m *WantlistMutation) Title() (r string, exists bool) {
+	v := m.title
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTitle returns the old "title" field's value of the Wantlist entity.
+// If the Wantlist object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *WantlistMutation) OldTitle(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTitle is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTitle requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTitle: %w", err)
+	}
+	return oldValue.Title, nil
+}
+
+// ResetTitle resets all changes to the "title" field.
+func (m *WantlistMutation) ResetTitle() {
+	m.title = nil
+}
+
+// SetUserID sets the "user_id" field.
+func (m *WantlistMutation) SetUserID(i int) {
+	m.user = &i
+}
+
+// UserID returns the value of the "user_id" field in the mutation.
+func (m *WantlistMutation) UserID() (r int, exists bool) {
+	v := m.user
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUserID returns the old "user_id" field's value of the Wantlist entity.
+// If the Wantlist object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *WantlistMutation) OldUserID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUserID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUserID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUserID: %w", err)
+	}
+	return oldValue.UserID, nil
+}
+
+// ResetUserID resets all changes to the "user_id" field.
+func (m *WantlistMutation) ResetUserID() {
+	m.user = nil
+}
+
+// ClearUser clears the "user" edge to the User entity.
+func (m *WantlistMutation) ClearUser() {
+	m.cleareduser = true
+	m.clearedFields[wantlist.FieldUserID] = struct{}{}
+}
+
+// UserCleared reports if the "user" edge to the User entity was cleared.
+func (m *WantlistMutation) UserCleared() bool {
+	return m.cleareduser
+}
+
+// UserIDs returns the "user" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// UserID instead. It exists only for internal usage by the builders.
+func (m *WantlistMutation) UserIDs() (ids []int) {
+	if id := m.user; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetUser resets all changes to the "user" edge.
+func (m *WantlistMutation) ResetUser() {
+	m.user = nil
+	m.cleareduser = false
+}
+
+// Where appends a list predicates to the WantlistMutation builder.
+func (m *WantlistMutation) Where(ps ...predicate.Wantlist) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the WantlistMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *WantlistMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.Wantlist, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *WantlistMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *WantlistMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (Wantlist).
+func (m *WantlistMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *WantlistMutation) Fields() []string {
+	fields := make([]string, 0, 2)
+	if m.title != nil {
+		fields = append(fields, wantlist.FieldTitle)
+	}
+	if m.user != nil {
+		fields = append(fields, wantlist.FieldUserID)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *WantlistMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case wantlist.FieldTitle:
+		return m.Title()
+	case wantlist.FieldUserID:
+		return m.UserID()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *WantlistMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case wantlist.FieldTitle:
+		return m.OldTitle(ctx)
+	case wantlist.FieldUserID:
+		return m.OldUserID(ctx)
+	}
+	return nil, fmt.Errorf("unknown Wantlist field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *WantlistMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case wantlist.FieldTitle:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTitle(v)
+		return nil
+	case wantlist.FieldUserID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUserID(v)
+		return nil
+	}
+	return fmt.Errorf("unknown Wantlist field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *WantlistMutation) AddedFields() []string {
+	var fields []string
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *WantlistMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *WantlistMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown Wantlist numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *WantlistMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *WantlistMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *WantlistMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown Wantlist nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *WantlistMutation) ResetField(name string) error {
+	switch name {
+	case wantlist.FieldTitle:
+		m.ResetTitle()
+		return nil
+	case wantlist.FieldUserID:
+		m.ResetUserID()
+		return nil
+	}
+	return fmt.Errorf("unknown Wantlist field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *WantlistMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.user != nil {
+		edges = append(edges, wantlist.EdgeUser)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *WantlistMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case wantlist.EdgeUser:
+		if id := m.user; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *WantlistMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *WantlistMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *WantlistMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.cleareduser {
+		edges = append(edges, wantlist.EdgeUser)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *WantlistMutation) EdgeCleared(name string) bool {
+	switch name {
+	case wantlist.EdgeUser:
+		return m.cleareduser
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *WantlistMutation) ClearEdge(name string) error {
+	switch name {
+	case wantlist.EdgeUser:
+		m.ClearUser()
+		return nil
+	}
+	return fmt.Errorf("unknown Wantlist unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *WantlistMutation) ResetEdge(name string) error {
+	switch name {
+	case wantlist.EdgeUser:
+		m.ResetUser()
+		return nil
+	}
+	return fmt.Errorf("unknown Wantlist edge %s", name)
 }

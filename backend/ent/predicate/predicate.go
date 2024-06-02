@@ -20,3 +20,6 @@ type Token func(*sql.Selector)
 
 // User is the predicate function for user builders.
 type User func(*sql.Selector)
+
+// Wantlist is the predicate function for wantlist builders.
+type Wantlist func(*sql.Selector)

@@ -19,6 +19,7 @@ type TokenCheckRequest struct {
 	Token string `json:"token" binding:"required"`
 }
 
+
 //テーブルにユーザーIDが存在するか確認する関数の型定義
 type ExitsChecktype func(int) bool
 

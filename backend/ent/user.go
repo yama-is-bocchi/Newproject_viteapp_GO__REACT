@@ -36,9 +36,11 @@ type UserEdges struct {
 	Locks []*Lock `json:"locks,omitempty"`
 	// Tokens holds the value of the tokens edge.
 	Tokens []*Token `json:"tokens,omitempty"`
+	// Wantlists holds the value of the wantlists edge.
+	Wantlists []*Wantlist `json:"wantlists,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [4]bool
+	loadedTypes [5]bool
 }
 
 // BooksOrErr returns the Books value or an error if the edge
@@ -75,6 +77,15 @@ func (e UserEdges) TokensOrErr() ([]*Token, error) {
 		return e.Tokens, nil
 	}
 	return nil, &NotLoadedError{edge: "tokens"}
+}
+
+// WantlistsOrErr returns the Wantlists value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) WantlistsOrErr() ([]*Wantlist, error) {
+	if e.loadedTypes[4] {
+		return e.Wantlists, nil
+	}
+	return nil, &NotLoadedError{edge: "wantlists"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -150,6 +161,11 @@ func (u *User) QueryLocks() *LockQuery {
 // QueryTokens queries the "tokens" edge of the User entity.
 func (u *User) QueryTokens() *TokenQuery {
 	return NewUserClient(u.config).QueryTokens(u)
+}
+
+// QueryWantlists queries the "wantlists" edge of the User entity.
+func (u *User) QueryWantlists() *WantlistQuery {
+	return NewUserClient(u.config).QueryWantlists(u)
 }
 
 // Update returns a builder for updating this User.

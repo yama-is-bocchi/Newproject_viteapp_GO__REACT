@@ -3,6 +3,8 @@ package main
 import (
 	"Ebook/ent"
 	"Ebook/Sign_Methods"
+	"Ebook/Book_Methods"
+	"Ebook/WantList_Methods"
 	"Ebook/Structs"
 	"Ebook/Token_Methods"
 	"context"
@@ -54,6 +56,14 @@ func main() {
 	router.POST("users/sign_up", Sign_Methods.SignUpHandler)//サインアップ
 	router.POST("users/sign_in", Sign_Methods.SignInHandler)//サインイン
 	router.POST("users/Tokencheck", Token_Methods.TokenCheckHandler)//トークンチェック
+	router.POST("books/RegisterBook", Book_Methods.BookRegisterHandler)//本登録
+	router.POST("books/ViewBook", Book_Methods.BookViewHandler)//本参照
+	router.POST("books/UpdateBook", Book_Methods.BookUpdateHandler)//本更新
+	router.POST("books/DeleteBook", Book_Methods.BookDeleteHandler)//本削除
+	router.POST("wants/AddList", WantList_Methods.WantListRegisterHandler)//欲しいものリスト追加
+	router.POST("wants/ViewMylist", WantList_Methods.WantMyListViewHandler)//自分の欲しいものリスト参照
+	router.POST("wants/Viewlist", WantList_Methods.WantListViewHandler)//全体の欲しいものリスト参照
+	router.POST("wants/DeleteList", WantList_Methods.WantListDeleteHandler)//欲しいものリスト削除
 
 	// サーバー起動
 	router.Run(":8080")

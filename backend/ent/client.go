@@ -16,6 +16,7 @@ import (
 	"Ebook/ent/miss"
 	"Ebook/ent/token"
 	"Ebook/ent/user"
+	"Ebook/ent/wantlist"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect"
@@ -38,6 +39,8 @@ type Client struct {
 	Token *TokenClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
+	// Wantlist is the client for interacting with the Wantlist builders.
+	Wantlist *WantlistClient
 }
 
 // NewClient creates a new client configured with the given options.
@@ -54,6 +57,7 @@ func (c *Client) init() {
 	c.Miss = NewMissClient(c.config)
 	c.Token = NewTokenClient(c.config)
 	c.User = NewUserClient(c.config)
+	c.Wantlist = NewWantlistClient(c.config)
 }
 
 type (
@@ -144,13 +148,14 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:    ctx,
-		config: cfg,
-		Book:   NewBookClient(cfg),
-		Lock:   NewLockClient(cfg),
-		Miss:   NewMissClient(cfg),
-		Token:  NewTokenClient(cfg),
-		User:   NewUserClient(cfg),
+		ctx:      ctx,
+		config:   cfg,
+		Book:     NewBookClient(cfg),
+		Lock:     NewLockClient(cfg),
+		Miss:     NewMissClient(cfg),
+		Token:    NewTokenClient(cfg),
+		User:     NewUserClient(cfg),
+		Wantlist: NewWantlistClient(cfg),
 	}, nil
 }
 
@@ -168,13 +173,14 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		ctx:    ctx,
-		config: cfg,
-		Book:   NewBookClient(cfg),
-		Lock:   NewLockClient(cfg),
-		Miss:   NewMissClient(cfg),
-		Token:  NewTokenClient(cfg),
-		User:   NewUserClient(cfg),
+		ctx:      ctx,
+		config:   cfg,
+		Book:     NewBookClient(cfg),
+		Lock:     NewLockClient(cfg),
+		Miss:     NewMissClient(cfg),
+		Token:    NewTokenClient(cfg),
+		User:     NewUserClient(cfg),
+		Wantlist: NewWantlistClient(cfg),
 	}, nil
 }
 
@@ -203,21 +209,21 @@ func (c *Client) Close() error {
 // Use adds the mutation hooks to all the entity clients.
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
-	c.Book.Use(hooks...)
-	c.Lock.Use(hooks...)
-	c.Miss.Use(hooks...)
-	c.Token.Use(hooks...)
-	c.User.Use(hooks...)
+	for _, n := range []interface{ Use(...Hook) }{
+		c.Book, c.Lock, c.Miss, c.Token, c.User, c.Wantlist,
+	} {
+		n.Use(hooks...)
+	}
 }
 
 // Intercept adds the query interceptors to all the entity clients.
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
-	c.Book.Intercept(interceptors...)
-	c.Lock.Intercept(interceptors...)
-	c.Miss.Intercept(interceptors...)
-	c.Token.Intercept(interceptors...)
-	c.User.Intercept(interceptors...)
+	for _, n := range []interface{ Intercept(...Interceptor) }{
+		c.Book, c.Lock, c.Miss, c.Token, c.User, c.Wantlist,
+	} {
+		n.Intercept(interceptors...)
+	}
 }
 
 // Mutate implements the ent.Mutator interface.
@@ -233,6 +239,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.Token.mutate(ctx, m)
 	case *UserMutation:
 		return c.User.mutate(ctx, m)
+	case *WantlistMutation:
+		return c.Wantlist.mutate(ctx, m)
 	default:
 		return nil, fmt.Errorf("ent: unknown mutation type %T", m)
 	}
@@ -1006,6 +1014,22 @@ func (c *UserClient) QueryTokens(u *User) *TokenQuery {
 	return query
 }
 
+// QueryWantlists queries the wantlists edge of a User.
+func (c *UserClient) QueryWantlists(u *User) *WantlistQuery {
+	query := (&WantlistClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := u.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(wantlist.Table, wantlist.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.WantlistsTable, user.WantlistsColumn),
+		)
+		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *UserClient) Hooks() []Hook {
 	return c.hooks.User
@@ -1031,12 +1055,161 @@ func (c *UserClient) mutate(ctx context.Context, m *UserMutation) (Value, error)
 	}
 }
 
+// WantlistClient is a client for the Wantlist schema.
+type WantlistClient struct {
+	config
+}
+
+// NewWantlistClient returns a client for the Wantlist from the given config.
+func NewWantlistClient(c config) *WantlistClient {
+	return &WantlistClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `wantlist.Hooks(f(g(h())))`.
+func (c *WantlistClient) Use(hooks ...Hook) {
+	c.hooks.Wantlist = append(c.hooks.Wantlist, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `wantlist.Intercept(f(g(h())))`.
+func (c *WantlistClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Wantlist = append(c.inters.Wantlist, interceptors...)
+}
+
+// Create returns a builder for creating a Wantlist entity.
+func (c *WantlistClient) Create() *WantlistCreate {
+	mutation := newWantlistMutation(c.config, OpCreate)
+	return &WantlistCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Wantlist entities.
+func (c *WantlistClient) CreateBulk(builders ...*WantlistCreate) *WantlistCreateBulk {
+	return &WantlistCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *WantlistClient) MapCreateBulk(slice any, setFunc func(*WantlistCreate, int)) *WantlistCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &WantlistCreateBulk{err: fmt.Errorf("calling to WantlistClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*WantlistCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &WantlistCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Wantlist.
+func (c *WantlistClient) Update() *WantlistUpdate {
+	mutation := newWantlistMutation(c.config, OpUpdate)
+	return &WantlistUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *WantlistClient) UpdateOne(w *Wantlist) *WantlistUpdateOne {
+	mutation := newWantlistMutation(c.config, OpUpdateOne, withWantlist(w))
+	return &WantlistUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *WantlistClient) UpdateOneID(id int) *WantlistUpdateOne {
+	mutation := newWantlistMutation(c.config, OpUpdateOne, withWantlistID(id))
+	return &WantlistUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Wantlist.
+func (c *WantlistClient) Delete() *WantlistDelete {
+	mutation := newWantlistMutation(c.config, OpDelete)
+	return &WantlistDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *WantlistClient) DeleteOne(w *Wantlist) *WantlistDeleteOne {
+	return c.DeleteOneID(w.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *WantlistClient) DeleteOneID(id int) *WantlistDeleteOne {
+	builder := c.Delete().Where(wantlist.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &WantlistDeleteOne{builder}
+}
+
+// Query returns a query builder for Wantlist.
+func (c *WantlistClient) Query() *WantlistQuery {
+	return &WantlistQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeWantlist},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Wantlist entity by its id.
+func (c *WantlistClient) Get(ctx context.Context, id int) (*Wantlist, error) {
+	return c.Query().Where(wantlist.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *WantlistClient) GetX(ctx context.Context, id int) *Wantlist {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryUser queries the user edge of a Wantlist.
+func (c *WantlistClient) QueryUser(w *Wantlist) *UserQuery {
+	query := (&UserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := w.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(wantlist.Table, wantlist.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, wantlist.UserTable, wantlist.UserColumn),
+		)
+		fromV = sqlgraph.Neighbors(w.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *WantlistClient) Hooks() []Hook {
+	return c.hooks.Wantlist
+}
+
+// Interceptors returns the client interceptors.
+func (c *WantlistClient) Interceptors() []Interceptor {
+	return c.inters.Wantlist
+}
+
+func (c *WantlistClient) mutate(ctx context.Context, m *WantlistMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&WantlistCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&WantlistUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&WantlistUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&WantlistDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Wantlist mutation op: %q", m.Op())
+	}
+}
+
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		Book, Lock, Miss, Token, User []ent.Hook
+		Book, Lock, Miss, Token, User, Wantlist []ent.Hook
 	}
 	inters struct {
-		Book, Lock, Miss, Token, User []ent.Interceptor
+		Book, Lock, Miss, Token, User, Wantlist []ent.Interceptor
 	}
 )

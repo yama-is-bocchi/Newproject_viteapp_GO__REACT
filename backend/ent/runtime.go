@@ -9,6 +9,7 @@ import (
 	"Ebook/ent/schema"
 	"Ebook/ent/token"
 	"Ebook/ent/user"
+	"Ebook/ent/wantlist"
 	"time"
 )
 
@@ -58,4 +59,10 @@ func init() {
 	userDescPassword := userFields[1].Descriptor()
 	// user.PasswordValidator is a validator for the "password" field. It is called by the builders before save.
 	user.PasswordValidator = userDescPassword.Validators[0].(func(string) error)
+	wantlistFields := schema.Wantlist{}.Fields()
+	_ = wantlistFields
+	// wantlistDescTitle is the schema descriptor for title field.
+	wantlistDescTitle := wantlistFields[0].Descriptor()
+	// wantlist.TitleValidator is a validator for the "title" field. It is called by the builders before save.
+	wantlist.TitleValidator = wantlistDescTitle.Validators[0].(func(string) error)
 }

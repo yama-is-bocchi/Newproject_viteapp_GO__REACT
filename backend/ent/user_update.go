@@ -9,6 +9,7 @@ import (
 	"Ebook/ent/predicate"
 	"Ebook/ent/token"
 	"Ebook/ent/user"
+	"Ebook/ent/wantlist"
 	"context"
 	"errors"
 	"fmt"
@@ -119,6 +120,21 @@ func (uu *UserUpdate) AddTokens(t ...*Token) *UserUpdate {
 	return uu.AddTokenIDs(ids...)
 }
 
+// AddWantlistIDs adds the "wantlists" edge to the Wantlist entity by IDs.
+func (uu *UserUpdate) AddWantlistIDs(ids ...int) *UserUpdate {
+	uu.mutation.AddWantlistIDs(ids...)
+	return uu
+}
+
+// AddWantlists adds the "wantlists" edges to the Wantlist entity.
+func (uu *UserUpdate) AddWantlists(w ...*Wantlist) *UserUpdate {
+	ids := make([]int, len(w))
+	for i := range w {
+		ids[i] = w[i].ID
+	}
+	return uu.AddWantlistIDs(ids...)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (uu *UserUpdate) Mutation() *UserMutation {
 	return uu.mutation
@@ -206,6 +222,27 @@ func (uu *UserUpdate) RemoveTokens(t ...*Token) *UserUpdate {
 		ids[i] = t[i].ID
 	}
 	return uu.RemoveTokenIDs(ids...)
+}
+
+// ClearWantlists clears all "wantlists" edges to the Wantlist entity.
+func (uu *UserUpdate) ClearWantlists() *UserUpdate {
+	uu.mutation.ClearWantlists()
+	return uu
+}
+
+// RemoveWantlistIDs removes the "wantlists" edge to Wantlist entities by IDs.
+func (uu *UserUpdate) RemoveWantlistIDs(ids ...int) *UserUpdate {
+	uu.mutation.RemoveWantlistIDs(ids...)
+	return uu
+}
+
+// RemoveWantlists removes "wantlists" edges to Wantlist entities.
+func (uu *UserUpdate) RemoveWantlists(w ...*Wantlist) *UserUpdate {
+	ids := make([]int, len(w))
+	for i := range w {
+		ids[i] = w[i].ID
+	}
+	return uu.RemoveWantlistIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -443,6 +480,51 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if uu.mutation.WantlistsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.WantlistsTable,
+			Columns: []string{user.WantlistsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(wantlist.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.RemovedWantlistsIDs(); len(nodes) > 0 && !uu.mutation.WantlistsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.WantlistsTable,
+			Columns: []string{user.WantlistsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(wantlist.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.WantlistsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.WantlistsTable,
+			Columns: []string{user.WantlistsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(wantlist.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, uu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{user.Label}
@@ -551,6 +633,21 @@ func (uuo *UserUpdateOne) AddTokens(t ...*Token) *UserUpdateOne {
 	return uuo.AddTokenIDs(ids...)
 }
 
+// AddWantlistIDs adds the "wantlists" edge to the Wantlist entity by IDs.
+func (uuo *UserUpdateOne) AddWantlistIDs(ids ...int) *UserUpdateOne {
+	uuo.mutation.AddWantlistIDs(ids...)
+	return uuo
+}
+
+// AddWantlists adds the "wantlists" edges to the Wantlist entity.
+func (uuo *UserUpdateOne) AddWantlists(w ...*Wantlist) *UserUpdateOne {
+	ids := make([]int, len(w))
+	for i := range w {
+		ids[i] = w[i].ID
+	}
+	return uuo.AddWantlistIDs(ids...)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (uuo *UserUpdateOne) Mutation() *UserMutation {
 	return uuo.mutation
@@ -638,6 +735,27 @@ func (uuo *UserUpdateOne) RemoveTokens(t ...*Token) *UserUpdateOne {
 		ids[i] = t[i].ID
 	}
 	return uuo.RemoveTokenIDs(ids...)
+}
+
+// ClearWantlists clears all "wantlists" edges to the Wantlist entity.
+func (uuo *UserUpdateOne) ClearWantlists() *UserUpdateOne {
+	uuo.mutation.ClearWantlists()
+	return uuo
+}
+
+// RemoveWantlistIDs removes the "wantlists" edge to Wantlist entities by IDs.
+func (uuo *UserUpdateOne) RemoveWantlistIDs(ids ...int) *UserUpdateOne {
+	uuo.mutation.RemoveWantlistIDs(ids...)
+	return uuo
+}
+
+// RemoveWantlists removes "wantlists" edges to Wantlist entities.
+func (uuo *UserUpdateOne) RemoveWantlists(w ...*Wantlist) *UserUpdateOne {
+	ids := make([]int, len(w))
+	for i := range w {
+		ids[i] = w[i].ID
+	}
+	return uuo.RemoveWantlistIDs(ids...)
 }
 
 // Where appends a list predicates to the UserUpdate builder.
@@ -898,6 +1016,51 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(token.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if uuo.mutation.WantlistsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.WantlistsTable,
+			Columns: []string{user.WantlistsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(wantlist.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.RemovedWantlistsIDs(); len(nodes) > 0 && !uuo.mutation.WantlistsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.WantlistsTable,
+			Columns: []string{user.WantlistsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(wantlist.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.WantlistsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.WantlistsTable,
+			Columns: []string{user.WantlistsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(wantlist.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

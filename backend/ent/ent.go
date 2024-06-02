@@ -8,6 +8,7 @@ import (
 	"Ebook/ent/miss"
 	"Ebook/ent/token"
 	"Ebook/ent/user"
+	"Ebook/ent/wantlist"
 	"context"
 	"errors"
 	"fmt"
@@ -77,11 +78,12 @@ var (
 func checkColumn(table, column string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
-			book.Table:  book.ValidColumn,
-			lock.Table:  lock.ValidColumn,
-			miss.Table:  miss.ValidColumn,
-			token.Table: token.ValidColumn,
-			user.Table:  user.ValidColumn,
+			book.Table:     book.ValidColumn,
+			lock.Table:     lock.ValidColumn,
+			miss.Table:     miss.ValidColumn,
+			token.Table:    token.ValidColumn,
+			user.Table:     user.ValidColumn,
+			wantlist.Table: wantlist.ValidColumn,
 		})
 	})
 	return columnCheck(table, column)
