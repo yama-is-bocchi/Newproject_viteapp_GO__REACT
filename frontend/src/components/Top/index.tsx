@@ -28,9 +28,15 @@ const Top = () => {
     config: { duration: 2000 }, // ここでアニメーションの速度を設定します（1000ms = 1秒）
   });
 
+  //サインアップクリック
 const SignUpClick=()=>{
   navigate("/SignUp")
 }
+
+  //サインインクリック
+  const SignInClick=()=>{
+    navigate("/SignIn")
+  }
 
   return (
     <body>
@@ -39,7 +45,7 @@ const SignUpClick=()=>{
           <animated.div style={fade}>
             <a className="header">
               <h1>Welcome to Ebooks!</h1>
-              <Button style={EmeraldMidBtn}>
+              <Button style={EmeraldMidBtn} onClick={SignInClick}>
                 <h2>SignIn</h2>
               </Button>
               <br />

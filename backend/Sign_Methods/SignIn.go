@@ -152,6 +152,6 @@ func SignInHandler(c *gin.Context) {
 
 	newToken := <-TokenChan
 
-	c.JSON(200, gin.H{"user": sign_in_user, "token": newToken, "error": "OK"})
+	c.JSON(200, gin.H{"Name": sign_in_user.Name, "Token": newToken, "Error": "OK"})
 
 }

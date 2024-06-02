@@ -25,8 +25,9 @@ import {
   EscapeInput,
   PasswordChecker,
   hasSpecialCharacters,
+  sleep
 } from "src/Util/method.tsx";
-import {SubmitSignUp} from "api/Sign.tsx"
+import { SubmitSignUp } from "api/Sign.tsx";
 
 const SignUp = () => {
   const navigate = useNavigate(); //ルーター
@@ -50,7 +51,7 @@ const SignUp = () => {
   //API送信ボタン
   const SubmitClick = async () => {
     //空欄が無いか
-    if(Name==="" || Password===""|| TwoPassword===""){
+    if (Name === "" || Password === "" || TwoPassword === "") {
       CautionComment("caution", "※入力に空欄があります");
       return;
     }
@@ -78,14 +79,14 @@ const SignUp = () => {
     const EscapedName = EscapeInput(Name);
     const EscapedPassword = EscapeInput(Password);
     //パスワードが脆弱じゃないか?
-    if(PasswordChecker(EscapedPassword)===false){
-      CautionComment("caution","※パスワードが脆弱です");
+    if (PasswordChecker(EscapedPassword) === false) {
+      CautionComment("caution", "※パスワードが脆弱です");
       return;
     }
 
     //サーバーの返答を待つ
     const ServerResult = await SubmitSignUp(EscapedName, EscapedPassword);
-    
+
     //Nameが重複していないか&サーバーからの返答が200か?
     if (ServerResult === 403) {
       CautionComment("caution", "※名前が重複しています。");
@@ -97,7 +98,16 @@ const SignUp = () => {
       return;
     }
     //サインアップ成功
-    //メニュー画面へ遷移
+    CautionComment("caution", "");
+    CautionComment("success", "Success!!");
+    const Img = document.getElementById("SuccessImg");
+    if (Img !== null) {
+      Img.style.display = "";
+    }
+    await sleep(1000);
+    navigate("/SignIn");
+    //サインイン画面へ遷移
+    return;
   };
 
   useEffect(() => {
@@ -110,8 +120,15 @@ const SignUp = () => {
           <animated.div style={fade}>
             <h1 className="header">SignUp</h1>
             <div className="TextSpace">
-              <span>UserName</span>
+              <span>UserName　　</span>
               <span id="caution" className="Caution"></span>
+              <span id="success" className="Success"></span>
+              <img
+                id="SuccessImg"
+                src="public/images/happy.gif"
+                alt="Example"
+                style={{ display: "none", maxWidth: "20%", height: "auto" }}
+              />
               <TextInput
                 fullWidth
                 placeholder="name..."
@@ -152,7 +169,7 @@ const SignUp = () => {
               />
             </div>
             <div className="TextSpace">
-              <span>UserName</span>
+              <span>One more password</span>
               <TextInput
                 placeholder="password..."
                 type={passwordVisible ? "text" : "password"}

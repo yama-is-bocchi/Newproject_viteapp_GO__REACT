@@ -61,3 +61,8 @@ export function hasSpecialCharacters(input: string): boolean {
   // 正規表現を使って特殊文字をチェックする
   return /[&<>"'\/\\`=$;:(){}[\]|^%~#@!*?+]/.test(input);
 }
+
+//非同期処理でスリープ
+export async function sleep(ms: number) {
+ return new Promise((resolve) => setTimeout(resolve, ms));
+}
