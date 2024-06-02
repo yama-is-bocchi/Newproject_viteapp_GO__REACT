@@ -1,3 +1,5 @@
+import { SubmitTokenCheck } from "api/TokenCheck.tsx";
+
 const specialChars: { [key: string]: string } = {
   '&': '',
   '<': '',
@@ -64,5 +66,13 @@ export function hasSpecialCharacters(input: string): boolean {
 
 //非同期処理でスリープ
 export async function sleep(ms: number) {
- return new Promise((resolve) => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+
+
+//引数のニューメリックチェック
+export function isNumericString(value: string): boolean {
+  // 正規表現を使用して、文字列が0-9の数字のみで構成されているかを確認
+  return /^[0-9]+$/.test(value);
 }

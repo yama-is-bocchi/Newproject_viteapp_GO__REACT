@@ -23,7 +23,7 @@ func SignInHandler(c *gin.Context) {
 
 	//reqに取得したデータを格納、変換でエラーが起きた場合はエラーを返して終了
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(401, gin.H{"error": "err"})
+		c.JSON(401, gin.H{"Error": "err"})
 		return
 	}
 
@@ -45,7 +45,7 @@ func SignInHandler(c *gin.Context) {
 
 		if err != nil {
 			//存在しないので
-			c.JSON(401, gin.H{"error": "err"})
+			c.JSON(401, gin.H{"Error": "err"})
 			return
 		}
 
@@ -56,7 +56,7 @@ func SignInHandler(c *gin.Context) {
 		existlocklist := Lock_Methods.CheckLocklist(structs.Client)
 
 		if structs.ExistCheckfunc(miss_user.ID, existlocklist) {
-			c.JSON(403, gin.H{"error": "lock"})
+			c.JSON(403, gin.H{"Error": "lock"})
 			return
 		}
 
@@ -71,7 +71,7 @@ func SignInHandler(c *gin.Context) {
 				First(context.Background())
 
 			if err != nil {
-				c.JSON(401, gin.H{"error": "err"})
+				c.JSON(401, gin.H{"Error": "err"})
 				return
 			}
 			//インクリメント処理
@@ -80,20 +80,20 @@ func SignInHandler(c *gin.Context) {
 			_, err = Miss_Methods.IncrementCountatMissList(structs.Client, target_user.ID, target_user.UserID, target_user.Count)
 
 			if err != nil {
-				c.JSON(401, gin.H{"error": "err"})
+				c.JSON(401, gin.H{"Error": "err"})
 				return
 			}
 
-			c.JSON(401, gin.H{"error": "err"})
+			c.JSON(401, gin.H{"Error": "err"})
 			return
 		}
 
 		//Missテーブルには存在しないので追加処理
 		_, err = Miss_Methods.InsertMissList(structs.Client, miss_user.ID)
 		if err != nil {
-			c.JSON(401, gin.H{"error": "err"})
+			c.JSON(401, gin.H{"Error": "err"})
 		}
-		c.JSON(401, gin.H{"error": "err"})
+		c.JSON(401, gin.H{"Error": "err"})
 		return
 	}
 
@@ -102,7 +102,7 @@ func SignInHandler(c *gin.Context) {
 	existlocklist := Lock_Methods.CheckLocklist(structs.Client)
 
 	if structs.ExistCheckfunc(sign_in_user.ID, existlocklist) {
-		c.JSON(403, gin.H{"error": "lock"})
+		c.JSON(403, gin.H{"Error": "lock"})
 		return
 	}
 
@@ -123,7 +123,7 @@ func SignInHandler(c *gin.Context) {
 			_, err := Miss_Methods.ReverseZeroMissCount(structs.Client, sign_in_user.ID)
 
 			if err != nil {
-				c.JSON(401, gin.H{"error": "err"})
+				c.JSON(401, gin.H{"Error": "err"})
 				return
 			}
 		}
@@ -138,7 +138,7 @@ func SignInHandler(c *gin.Context) {
 		generatedToken, err :=Token_Methods.SaveToken(structs.Client, sign_in_user.ID)
 
 		if err != nil {
-			c.JSON(401, gin.H{"error": "err"})
+			c.JSON(401, gin.H{"Error": "err"})
 			return
 		}
 		TokenChan <- generatedToken

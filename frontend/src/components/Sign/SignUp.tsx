@@ -28,6 +28,7 @@ import {
   sleep
 } from "src/Util/method.tsx";
 import { SubmitSignUp } from "api/Sign.tsx";
+import {UserLenLimit} from "src/Util/common.tsx"
 
 const SignUp = () => {
   const navigate = useNavigate(); //ルーター
@@ -62,7 +63,7 @@ const SignUp = () => {
       return;
     }
     //長すぎないか
-    if (Name.length > 30 || Password.length > 30 || TwoPassword.length > 30) {
+    if (Name.length > UserLenLimit || Password.length > UserLenLimit || TwoPassword.length > UserLenLimit) {
       CautionComment("caution", "※入力が長すぎます");
       return;
     }
