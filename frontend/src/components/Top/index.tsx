@@ -11,12 +11,12 @@ import {
 import { EmeraldMidBtn } from "./../../styles/Button.tsx";
 import React, { useState, useEffect } from "react";
 import { useSpring, animated } from "react-spring";
-import { BrowserRouter as Router, Route, Routes, Link,useNavigate  } from "react-router-dom";
+import { BrowserRouter as Router, Route, Routes, Link, useNavigate } from "react-router-dom";
 
 
 const Top = () => {
- 
-  const navigate= useNavigate(); 
+
+  const navigate = useNavigate();
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
@@ -29,20 +29,31 @@ const Top = () => {
   });
 
   //サインアップクリック
-const SignUpClick=()=>{
-  navigate("/SignUp")
-}
+  const SignUpClick = () => {
+    navigate("/SignUp")
+  }
 
   //サインインクリック
-  const SignInClick=()=>{
+  const SignInClick = () => {
     navigate("/SignIn")
   }
 
   return (
-    <body>
-      <MantineProvider>
-        <div className="App">
-          <animated.div style={fade}>
+    <animated.div style={fade}>
+      <div
+        style={{
+          textAlign: "center",
+          position: "relative",
+          height: "100vh",
+          backgroundImage: "url(/images/libone.jpg)",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
+      >
+        <MantineProvider>
+
+          <div className="App">
+
             <a className="header">
               <h1>Welcome to Ebooks!</h1>
               <Button style={EmeraldMidBtn} onClick={SignInClick}>
@@ -64,12 +75,14 @@ const SignUpClick=()=>{
                 textDecoration: "none",
               }}
             >
-             <u> What is Ebook?</u>
+              <u> What is Ebook?</u>
             </Link>
-          </animated.div>
-        </div>
-      </MantineProvider>
-    </body>
+
+          </div>
+
+        </MantineProvider>
+      </div>
+    </animated.div>
   );
 };
 

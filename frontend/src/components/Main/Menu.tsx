@@ -49,18 +49,33 @@ const Menu = () => {
 
   return (
     <animated.div style={fade}>
+              <div
+          style={{
+            textAlign: "center",
+            position: "relative",
+            height: "100vh",
+            backgroundImage: "url(/images/libone.jpg)",
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+          }}
+        >
       <MantineProvider>
         <div style={{ display: 'flex' }}>
+
           <Sidebar Name={UserInfo.Name} Token={UserInfo.Token} />
 
           <div style={{ flex: 1, padding: '20px',textAlign: 'center'}}>
+            <span className="header">
             <h1>Welcome to Ebook!!</h1>
             <p>ようこそ、{UserInfo.Name}様。</p>
             <p>サイドバーから利用したいサービスを選んでください。</p>
+            </span>
           </div>
         </div>
 
+
       </MantineProvider>
+      </div>
     </animated.div>
   );
 }

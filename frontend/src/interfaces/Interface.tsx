@@ -18,3 +18,24 @@ interface BookInfo{
     Price:number;
     Recom:string;
 }
+
+//編集本の構造体
+interface EditBookInfo{
+    Pretitle:string;
+    Title:string;
+    Kind:string;
+    Price:number;
+    Recom:string;
+    Name:string;
+    Token:string;
+}
+
+//削除申請の構造体
+interface DeleteBookInfo{
+    Title:string;
+    Kind:string;
+    Price:number;
+    Recom:string;
+    Name:string;
+    Token:string;
+}

@@ -17,7 +17,7 @@ func BookRegisterHandler(c *gin.Context) {
 	var req structs.BookRegisterRequest
 	//reqに取得したデータを格納、変換でエラーが起きた場合はエラーを返して終了
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(300, gin.H{"error": "変換できません"})
+		c.JSON(400, gin.H{"error": "変換できません"})
 		return
 	}
 
@@ -43,13 +43,13 @@ func BookRegisterHandler(c *gin.Context) {
 	existlocklist := Lock_Methods.CheckLocklist(structs.Client)
 
 	if structs.ExistCheckfunc(subimiteduser.ID, existlocklist) {
-		c.JSON(402, gin.H{"error": "invalid credentials"})
+		c.JSON(400, gin.H{"error": "invalid credentials"})
 		return
 	}
 
 	//トークンを確認する
 	if !Token_Methods.CheckNameToken(e_Name, e_Token) {
-		c.JSON(404, gin.H{"error": "token"})
+		c.JSON(400, gin.H{"error": "token"})
 		return
 	}
 
@@ -60,7 +60,7 @@ func BookRegisterHandler(c *gin.Context) {
 
 	if err == nil {
 		//存在する
-		c.JSON(405, gin.H{"error": "invalid credentials"})
+		c.JSON(403, gin.H{"error": "invalid credentials"})
 		return
 
 	}
@@ -75,7 +75,7 @@ func BookRegisterHandler(c *gin.Context) {
 
 	//データベース登録失敗
 	if err != nil {
-		c.JSON(406, gin.H{"error": "データベース登録処理", "book": newBook})
+		c.JSON(400, gin.H{"error": "データベース登録処理", "book": newBook})
 		return
 	}
 

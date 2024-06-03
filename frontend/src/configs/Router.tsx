@@ -4,6 +4,10 @@ import SignUp from "../components/Sign/SignUp.tsx";
 import SignIn from "../components/Sign/SignIn.tsx";
 import Menu from "../components/Main/Menu.tsx"
 import AddBook from "../components/Main/AddBook.tsx"
+import RegisteredBooks from "../components/Main/RegisteredBooks.tsx"
+import UpdateBook from "../components/Main/UpdateBook.tsx"
+import EditBook from "../components/Main/EditBook.tsx"
+import DeleteBook from "../components/Main/DeleteBook.tsx"
 import { createBrowserRouter } from "react-router-dom";
 
 const router = createBrowserRouter([
@@ -13,6 +17,10 @@ const router = createBrowserRouter([
   { path: "/SignIn", element: <SignIn /> },
   { path: "/Menu", element: <Menu /> },
   { path: "/Menu/AddBook", element: <AddBook /> },
+  { path: "/Menu/RegisteredBooks", element: <RegisteredBooks /> },
+  { path: "/Menu/UpdateBook", element: <UpdateBook /> },
+  { path: "/Menu/UpdateBook/Edit", element: < EditBook /> },
+  { path: "/Menu/DeleteBook", element: <DeleteBook /> },
 ]);
 
 export default router;
