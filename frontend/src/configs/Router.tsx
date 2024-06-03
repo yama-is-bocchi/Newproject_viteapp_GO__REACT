@@ -8,6 +8,8 @@ import RegisteredBooks from "../components/Main/RegisteredBooks.tsx"
 import UpdateBook from "../components/Main/UpdateBook.tsx"
 import EditBook from "../components/Main/EditBook.tsx"
 import DeleteBook from "../components/Main/DeleteBook.tsx"
+import LookingForBooks from "../components/Main/LookingForBook.tsx"
+import KindPage from "../components/Main/KindPage.tsx"
 import { createBrowserRouter } from "react-router-dom";
 
 const router = createBrowserRouter([
@@ -21,6 +23,8 @@ const router = createBrowserRouter([
   { path: "/Menu/UpdateBook", element: <UpdateBook /> },
   { path: "/Menu/UpdateBook/Edit", element: < EditBook /> },
   { path: "/Menu/DeleteBook", element: <DeleteBook /> },
+  { path: "/Menu/LookingForBooks", element: <LookingForBooks /> },
+  { path: "/Menu/LookingForBooks/Kinds", element: <KindPage /> },
 ]);
 
 export default router;

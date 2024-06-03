@@ -39,3 +39,17 @@ interface DeleteBookInfo{
     Name:string;
     Token:string;
 }
+
+//種類別選択の構造体
+interface GetLFBInfo{
+    Kind:string;
+    Name:string;
+    Token:string;
+}
+
+//欲しいものリスト選択の構造体
+interface AddLFBInfo{
+    Title:string;
+    Name:string;
+    Token:string;
+}

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useSpring, animated } from "react-spring";
 import { SubmitTokenCheck } from "api/TokenCheck.tsx";
-import { GetBookList } from "api/Book.tsx";
+import { GetLFBList } from "api/LookingForBooks.tsx";
 import {
     Anchor,
     Navbar,
@@ -24,9 +24,10 @@ import {
 import { Sidebar } from "src/styles/Layouts.tsx"
 import { useNavigate, useLocation } from "react-router-dom";
 import { BookTitleLimit, BookPriceLimit, BookRecomLimit } from "src/Util/common.tsx"
-import { UserSessionInfo, BookInfo } from "src/components/interfaces/interface.tsx"
+import { UserSessionInfo, GetLFBInfo } from "src/components/interfaces/interface.tsx"
+import { AquaLargeBtn } from "src/styles/Button.tsx"
 
-const RegisteredBooks = () => {
+const LookingForBooks = () => {
     const location = useLocation();//ローケーション
     const navigate = useNavigate();//ナビゲーション
     const UserInfo = location.state as MessageState;//パラメータ(state)
@@ -39,6 +40,18 @@ const RegisteredBooks = () => {
         config: { duration: 500 }, // ここでアニメーションの速度を設定します（1000ms = 1秒）
     });
 
+    //種類を選択
+    const SelectClick = async (e) => {
+        const SelectData: GetLFBInfo = {
+            Kind: e.target.textContent,
+            Name: UserInfo.Name,
+            Token: UserInfo.Token
+        }
+        //APIを呼び出し、本のリストを取得する
+        //ここでデータ取得してから遷移
+        navigate("/Menu/LookingForBooks/Kinds", { state: { UserInfo: UserInfo, BookInfo: await GetLFBList(SelectData)} });
+        return;
+    }
 
 
 
@@ -52,8 +65,6 @@ const RegisteredBooks = () => {
             //userinfo.tokenを渡してトークンAPIを呼び出す
             if (await SubmitTokenCheck(UserInfo.Name, UserInfo.Token) === 200) {
                 await setIsVisible(true);
-                //APIを呼び出し、本のリストを取得する
-                setApiDatas(await GetBookList(UserInfo.Name, UserInfo.Token))
                 return;
             } else {
                 navigate("/");
@@ -66,32 +77,26 @@ const RegisteredBooks = () => {
 
     return (
         <animated.div style={fade}>
-                <MantineProvider>
-                    <div style={{ display: 'flex' ,textAlign: "center",}}>
-                        <Sidebar Name={UserInfo.Name} Token={UserInfo.Token} />
-                        <div style={{ flex: 1, padding: '20px', textAlign: 'center',paddingTop: '150px' }}>
-                                <Text size="xl" weight={700} mb="lg">
-                                    <h2 className="header">登録本データ一覧</h2>
-                                </Text>
-                                <List spacing="lg" size="sm">
-                                    {ApiDatas.map((item, index) => (
-                                        <ListItem key={index} style={{ display: "flex", justifyContent: "center", marginBottom: "20px" }}>
-                                            <Card shadow="sm" padding="lg" withBorder>
-                                                <Text size="lg" weight={500}>
-                                                   <h3> ・{item.title}</h3>
-                                                </Text>
-                                                <Text color="dimmed">種類: {item.kind}</Text>
-                                                <Text>あらすじ: {item.recom}</Text>
-                                            </Card>
-                                        </ListItem>
-                                    ))}
-                                </List>
-                        </div>
-                    </div>
+            <MantineProvider>
+                <div style={{ display: 'flex', textAlign: "center", }}>
+                    <Sidebar Name={UserInfo.Name} Token={UserInfo.Token} />
+                    <div style={{ flex: 1, padding: '20px', textAlign: 'center', paddingTop: '150px' }}>
+                        <Text size="xl" weight={700} mb="lg">
+                            <h2 className="header">Lookin for Books</h2>
+                        </Text>
+                        <Button onClick={SelectClick} style={AquaLargeBtn}>アーキテクチャ</Button>
+                        <Button onClick={SelectClick} style={AquaLargeBtn}>AI,ML</Button>
+                        <Button onClick={SelectClick} style={AquaLargeBtn}>プロトコル</Button>
+                        <Button onClick={SelectClick} style={AquaLargeBtn}>セキュリティ</Button>
+                        <Button onClick={SelectClick} style={AquaLargeBtn}>プログラミング言語</Button>
+                        <Button onClick={SelectClick} style={AquaLargeBtn}>技術書</Button>
 
-                </MantineProvider>
+                    </div>
+                </div>
+
+            </MantineProvider>
         </animated.div>
     );
 }
 
-export default RegisteredBooks;
+export default LookingForBooks;

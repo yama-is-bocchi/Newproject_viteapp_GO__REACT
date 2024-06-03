@@ -81,6 +81,13 @@ export const Sidebar: React.FC<UserSessionInfo> = ({ Name, Token }) => {
             return;
         };
 
+//LFBクリック
+
+const LookingForBookClick = () => {
+    // ユーザー情報を渡して画面遷移
+    navigate("/Menu/LookingForBooks", { state: UserInfo });
+    return;
+};
     //サインアウト
     const SignOutClick = () => {
         navigate("/");
@@ -106,7 +113,7 @@ export const Sidebar: React.FC<UserSessionInfo> = ({ Name, Token }) => {
                     <li><button style={buttonStyle} onClick={DeleteBookClick}>DeleteBook</button></li>
                 </animated.div>
                 <animated.div style={five_slideIn}>
-                    <li><button style={buttonStyle}>Looking for Books</button></li>
+                    <li><button style={buttonStyle} onClick={LookingForBookClick}>Looking for Books</button></li>
                 </animated.div>
                 <animated.div style={six_slideIn}>
                     <li><button style={buttonStyle}>MyList</button></li>
