@@ -32,7 +32,7 @@ func WantListRegisterHandler(c *gin.Context) {
 
 	//ユーザー名が存在しない
 	if err != nil {
-		c.JSON(401, gin.H{"error": "invalid credentials"})
+		c.JSON(400, gin.H{"error": "invalid credentials"})
 		return
 	}
 
@@ -41,13 +41,13 @@ func WantListRegisterHandler(c *gin.Context) {
 	existlocklist := Lock_Methods.CheckLocklist(structs.Client)
 
 	if structs.ExistCheckfunc(subimiteduser.ID, existlocklist) {
-		c.JSON(402, gin.H{"error": "invalid credentials"})
+		c.JSON(400, gin.H{"error": "invalid credentials"})
 		return
 	}
 
 	//トークンを確認する
 	if !Token_Methods.CheckNameToken(e_Name, e_Token) {
-		c.JSON(404, gin.H{"error": "token"})
+		c.JSON(400, gin.H{"error": "token"})
 		return
 	}
 
@@ -58,7 +58,7 @@ func WantListRegisterHandler(c *gin.Context) {
 
 	if err != nil {
 		//存在しない
-		c.JSON(405, gin.H{"error": "invalid credentials"})
+		c.JSON(400, gin.H{"error": "invalid credentials"})
 		return
 	}
 
@@ -69,7 +69,7 @@ func WantListRegisterHandler(c *gin.Context) {
 
 	if err == nil {
 		//存在する
-		c.JSON(405, gin.H{"error": "invalid credentials"})
+		c.JSON(403, gin.H{"error": "invalid credentials"})
 		return
 	}
 
@@ -81,10 +81,9 @@ func WantListRegisterHandler(c *gin.Context) {
 
 	//データベース登録失敗
 	if err != nil {
-		c.JSON(406, gin.H{"error": "データベース登録処理", "book": newList})
+		c.JSON(400, gin.H{"error": "データベース登録処理", "book": newList})
 		return
 	}
-
 	//正常終了
-	c.JSON(200, gin.H{"book": newList})
+	c.JSON(200, gin.H{"error": "ok"})
 }

@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useSpring, animated } from "react-spring";
 import { SubmitTokenCheck } from "api/TokenCheck.tsx";
-import { GetBookList } from "api/Book.tsx";
-import { WantsListRegister} from "api/LookingForBooks.tsx";
 import {
     Anchor,
     Navbar,
@@ -23,12 +21,11 @@ import {
     isNumericString
 } from "src/Util/method.tsx";
 import { Sidebar, listItemStyle } from "src/styles/Layouts.tsx"
-import { EmeraldSmallBtn } from "src/styles/Button.tsx"
 import { useNavigate, useLocation } from "react-router-dom";
 import { BookTitleLimit, BookPriceLimit, BookRecomLimit } from "src/Util/common.tsx"
-import { UserSessionInfo, BookInfo ,AddLFBInfo} from "src/components/interfaces/interface.tsx"
-
-
+import { UserSessionInfo, GetLFBInfo, AddLFBInfo } from "src/components/interfaces/interface.tsx"
+import { BlueSmallBtn } from "src/styles/Button.tsx"
+import { ListGetLFB, WantsListRegister } from "api/LFBAPI.tsx";
 
 const KindPage = () => {
     const location = useLocation();//ローケーション
@@ -39,6 +36,7 @@ const KindPage = () => {
     const [PutBooks, setPutBooks] = useState([]);//表示するデータ
     const [WantBooks, setWantBooks] = useState([]);//表示するデータ
     const AddedBooks: string[] = [];//このページで追加した本のname
+    const [clickedButton, setClickedButton] = useState(null);
 
 
     //アニメーション
@@ -47,37 +45,52 @@ const KindPage = () => {
         config: { duration: 500 }, // ここでアニメーションの速度を設定します（1000ms = 1秒）
     });
 
+
     const slideIn = useSpring({
         transform: isVisible ? "translateX(0)" : "translateX(-100%)",
         config: { duration: 500, tension: 200, friction: 20 },
     });
 
+    //ボタンのスタイル
+
+
+
     const AddClick = async (e) => {
-        //wants,AddedBooksに含まれていれば飛ばし
-        const Existwants = State.BookInfo.Wants.find(item => item.title === e.target.id);
-        const Existadded = AddedBooks.find(item => item === e.target.id);
-        if(Existwants||Existadded ){
-            e.textContent ="追加済み";
-            console.log("nono")
-            return;
+        //APIに接続して返答を待つ
+        const submiter: AddLFBInfo = {
+            Title: e.target.id,
+            Name: State.UserInfo.Name,
+            Token: State.UserInfo.Token
+        };
 
-        }else{
-               //含まれていなければ追加ごAddedlistにも追加
-               const Added:AddLFBInfo={
-                Title:e.target.id,
-                Name:State.UserInfo.Name,
-                Token:State.UserInfo.Token
-               }
-
-            const Result=await WantsListRegister(Added);
-            console.log(Result)
-            if(Result===200){
-            AddedBooks.push(e.target.id)
-            console.log("okok")
-            }
+        const ResultStatus = await WantsListRegister(submiter);
+        //返答が403ならすでに追加済み
+        if (ResultStatus === 403) {
+            //追加済みと表示する
+            CautionComment(e.target.id, "※追加済み");
+            await sleep(2000);
+            await CautionComment(e.target.id, "マイリストに追加");
+        }
+        //200なら成功
+        //それ以外はエラー
+        if (ResultStatus !== 200) {
+            //エラーと表示する
+            CautionComment(e.target.id, "※エラー");
+            await sleep(2000);
+            await CautionComment(e.target.id, "マイリストに追加");
         }
 
+        if (ResultStatus === 200) {
+            //✓を表示
+            //緑に変色
+            setClickedButton(e.target.id);
+            CautionComment(e.target.id, "✓");
+            await sleep(2000);
+            await CautionComment(e.target.id, "マイリストに追加");
+            await setClickedButton(null);
+            return;
 
+        }
     }
 
 
@@ -91,14 +104,15 @@ const KindPage = () => {
             //userinfo.tokenを渡してトークンAPIを呼び出す
             if (await SubmitTokenCheck(State.UserInfo.Name, State.UserInfo.Token) === 200) {
                 await setIsVisible(true);
-
                 //成功
-                if(State.BookInfo.Books.length===0){
-                    CautionComment("caution","データがありません")
-                    return;
+                //API呼び出し
+                const Submiter: GetLFBInfo = {
+                    Kind: State.Kind,
+                    Name: State.UserInfo.Name,
+                    Token: State.UserInfo.Token
                 }
+                setApiDatas(await ListGetLFB(Submiter));
 
-                console.log(State.BookInfo.Books)
                 return;
             } else {
                 navigate("/");
@@ -125,20 +139,19 @@ const KindPage = () => {
                             </Text>
                         </span>
                         <List spacing="lg" size="sm">
-                        {State.BookInfo.Books.map((item, index) => (
-                            <animated.div style={slideIn}>
-                                        <div style={listItemStyle}>
-                                            <Text size="lg" weight={500}>
-                                                <h3> ・{item.title}</h3>
-                                            </Text>
-                                            <Text color="dimmed">種類: {item.kind}</Text>
-                                            <Text>あらすじ: {item.recom}</Text>
-                                            <Button style={EmeraldSmallBtn} id={item.title} onClick={AddClick }>マイリストに追加</Button>
-                                        </div>
-                            </animated.div>
-                                ))}
+                            {ApiDatas.map((item, index) => (
+                                <animated.div style={slideIn}>
+                                    <div style={listItemStyle}>
+                                        <Text size="lg" weight={500}>
+                                            <h3> ・{item.title}</h3>
+                                        </Text>
+                                        <Text color="dimmed">種類: {item.kind}</Text>
+                                        <Text>あらすじ: {item.recom}</Text>
+                                        <Button style={BlueSmallBtn} id={item.title} onClick={AddClick}>マイリストに追加</Button>
+                                    </div>
+                                </animated.div>
+                            ))}
                         </List>
-
                     </div>
                 </div>
 
@@ -146,7 +159,5 @@ const KindPage = () => {
         </animated.div>
     );
 }
-
-
 
 export default KindPage;

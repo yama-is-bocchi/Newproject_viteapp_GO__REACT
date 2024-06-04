@@ -68,7 +68,7 @@ export const EmeraldMidBtn = {
     fontSize: '16px',
     fontWeight: 'bold',
     transition: 'background-color 0.3s, color 0.3s',
-    width: '200px', // 例として横幅を200pxに指定
+    width: '150px', // 例として横幅を200pxに指定
     height: '50px', // 例として高さを50pxに指定
 
   };

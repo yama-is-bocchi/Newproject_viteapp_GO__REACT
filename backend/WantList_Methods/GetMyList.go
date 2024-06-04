@@ -50,8 +50,6 @@ func WantMyListViewHandler(c *gin.Context) {
 		c.JSON(403, gin.H{"error": "invalid credentials"})
 		return
 	}
-
-
 	//WantListに登録されているタイトルも送信
 	WantList, err := structs.Client.Wantlist.Query().
 	Where(wantlist.UserIDEQ(subimiteduser.ID)).

@@ -2,7 +2,6 @@ package WantList_Methods
 
 import (
 	"Ebook/ent/book"
-	"Ebook/ent/wantlist"
 	"Ebook/Lock_Methods"
 	"Ebook/Structs"
 	"Ebook/Token_Methods"
@@ -54,27 +53,16 @@ func WantListViewHandler(c *gin.Context) {
 	}
 
 	//対象のユーザーIDのBookテーブルのデータを全て送信
-	Datas, err := structs.Client.Book.Query().
+	Datas, temperr := structs.Client.Book.Query().
 		Where(book.KindEQ(e_Kind)).
 		All(context.Background())
 
 	//存在しないまたはエラー
-	if err != nil {
+	if temperr != nil {
 		c.JSON(403, gin.H{"error": "not exist"})
 		return
 	}
 
-	//WantListに登録されているタイトルも送信
-	WantList, err := structs.Client.Wantlist.Query().
-	Where(wantlist.UserIDEQ(subimiteduser.ID)).
-	All(context.Background())
-
-//存在しないまたはエラー
-if err != nil {
-	c.JSON(403, gin.H{"error": "not exist"})
-	return
-}
-
 	//正常終了
-	c.JSON(200, gin.H{"Books":Datas,"Wants":WantList})
+	c.JSON(200, Datas)
 }

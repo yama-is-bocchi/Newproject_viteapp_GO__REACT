@@ -15,7 +15,7 @@ export const Sidebar: React.FC<UserSessionInfo> = ({ Name, Token }) => {
 
     useEffect(() => {
 
-        if (!UserInfo||!UserInfo.Name||!UserInfo.Token ) {
+        if (!UserInfo || !UserInfo.Name || !UserInfo.Token) {
             navigate("/");
         }
         setIsVisible(true);
@@ -74,20 +74,28 @@ export const Sidebar: React.FC<UserSessionInfo> = ({ Name, Token }) => {
         return;
     };
 
-        // 選択本削除
-        const DeleteBookClick = () => {
-            // ユーザー情報を渡して画面遷移
-            navigate("/Menu/DeleteBook", { state: UserInfo });
-            return;
-        };
+    // 選択本削除
+    const DeleteBookClick = () => {
+        // ユーザー情報を渡して画面遷移
+        navigate("/Menu/DeleteBook", { state: UserInfo });
+        return;
+    };
 
-//LFBクリック
+    //LFBクリック
 
-const LookingForBookClick = () => {
-    // ユーザー情報を渡して画面遷移
-    navigate("/Menu/LookingForBooks", { state: UserInfo });
-    return;
-};
+    const LookingForBookClick = () => {
+        // ユーザー情報を渡して画面遷移
+        navigate("/Menu/LookingForBooks", { state: UserInfo });
+        return;
+    };
+
+    //マイリスト
+    const MylistClick = () => {
+        // ユーザー情報を渡して画面遷移
+        navigate("/Menu/MyList", { state: UserInfo });
+        return;
+    }
+
     //サインアウト
     const SignOutClick = () => {
         navigate("/");
@@ -116,7 +124,7 @@ const LookingForBookClick = () => {
                     <li><button style={buttonStyle} onClick={LookingForBookClick}>Looking for Books</button></li>
                 </animated.div>
                 <animated.div style={six_slideIn}>
-                    <li><button style={buttonStyle}>MyList</button></li>
+                    <li><button style={buttonStyle} onClick={ MylistClick}>MyList</button></li>
                 </animated.div>
                 <animated.div style={seven_slideIn}>
                     <li><button style={buttonStyle} onClick={SignOutClick}>SignOut</button></li>
@@ -164,4 +172,4 @@ export const listItemStyle = {
     padding: "10px",
     marginBottom: "60px",
 
-  };
+};

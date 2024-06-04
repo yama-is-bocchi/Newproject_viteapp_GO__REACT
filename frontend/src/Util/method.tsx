@@ -76,3 +76,14 @@ export function isNumericString(value: string): boolean {
   // 正規表現を使用して、文字列が0-9の数字のみで構成されているかを確認
   return /^[0-9]+$/.test(value);
 }
+
+//引数の時間(ms)の間引数の文字を引数の要素で表示するその後元に戻す
+export async function ChangeElementMs(ElementId:string,ChangeStr:string,Time:Int16Array){
+  let element = document.getElementById(ID);
+  if (element == null) return;
+  let tempTextcontent=element.textContent;
+  CautionComment(ElementId,ChangeStr);
+  await sleep(Time);
+  await CautionComment(ElementId,tempTextcontent);
+  return;
+}

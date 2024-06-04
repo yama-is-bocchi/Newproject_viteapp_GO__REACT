@@ -10,6 +10,8 @@ import EditBook from "../components/Main/EditBook.tsx"
 import DeleteBook from "../components/Main/DeleteBook.tsx"
 import LookingForBooks from "../components/Main/LookingForBook.tsx"
 import KindPage from "../components/Main/KindPage.tsx"
+import MyList from "../components/Main/MyList.tsx"
+
 import { createBrowserRouter } from "react-router-dom";
 
 const router = createBrowserRouter([
@@ -25,6 +27,7 @@ const router = createBrowserRouter([
   { path: "/Menu/DeleteBook", element: <DeleteBook /> },
   { path: "/Menu/LookingForBooks", element: <LookingForBooks /> },
   { path: "/Menu/LookingForBooks/Kinds", element: <KindPage /> },
+  { path: "/Menu/MyList", element: <MyList /> },
 ]);
 
 export default router;

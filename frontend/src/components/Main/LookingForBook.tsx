@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useSpring, animated } from "react-spring";
 import { SubmitTokenCheck } from "api/TokenCheck.tsx";
-import { GetLFBList } from "api/LookingForBooks.tsx";
 import {
     Anchor,
     Navbar,
@@ -42,14 +41,8 @@ const LookingForBooks = () => {
 
     //種類を選択
     const SelectClick = async (e) => {
-        const SelectData: GetLFBInfo = {
-            Kind: e.target.textContent,
-            Name: UserInfo.Name,
-            Token: UserInfo.Token
-        }
-        //APIを呼び出し、本のリストを取得する
-        //ここでデータ取得してから遷移
-        navigate("/Menu/LookingForBooks/Kinds", { state: { UserInfo: UserInfo, BookInfo: await GetLFBList(SelectData)} });
+        
+        navigate("/Menu/LookingForBooks/Kinds", { state: { UserInfo: UserInfo, Kind:e.target.textContent}});
         return;
     }
 

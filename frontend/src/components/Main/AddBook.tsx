@@ -37,6 +37,7 @@ const AddBook = () => {
   const [Kind, setKind] = useState(""); //種類
   const [Price, setPrice] = useState(""); //本の価格
   const [Recom, setRecom] = useState(""); //本のあらすじ
+  const [btnColor, setBtnColor] = useState('#00FFFF');//ボタン押下変色
 
   //アニメーション
   const fade = useSpring({
@@ -44,12 +45,17 @@ const AddBook = () => {
     config: { duration: 500 }, // ここでアニメーションの速度を設定します（1000ms = 1秒）
   });
 
+  //ボタンのスタイル
+  const buttonStyle = {
+    ...BlueSmallBtn,
+    backgroundColor: btnColor,
+  };
+
 
   //リスト展開ボタンクリック
   const handleButtonClick = () => {
     setShowList(!showList);
   };
-
   //リストアイテムボタンクリック
   const handleItemClick = async (item) => {
     await setKind(item);
@@ -58,6 +64,8 @@ const AddBook = () => {
 
   const SubmitClick = async () => {
     //空欄がないか
+
+
     if (Title === "" || Kind === "" ||
       Price === "" || Recom === ""
     ) {
@@ -118,8 +126,13 @@ const AddBook = () => {
       return;
     }
     if (ResulutStatus === 200) {
+      setBtnColor('limegreen'); // ボタンの色を緑に変更
       CautionComment("success", "本を追加しました!");
       CautionComment("caution", "");
+      CautionComment("submitbtn", "✓");
+      await sleep(1500);
+      await setBtnColor('#00FFFF'); // ボタンの色を元に戻す
+      await CautionComment("submitbtn", "Submit!");
       return;
     }
   }
@@ -295,7 +308,7 @@ const AddBook = () => {
                     </li>
                   </ul>
                 )}
-                <Button style={BlueSmallBtn} onClick={SubmitClick}>
+                <Button id="submitbtn" style={buttonStyle} onClick={SubmitClick}>
                   Submit!
                 </Button>
               </div>
