@@ -20,7 +20,8 @@ import {
     PasswordChecker,
     hasSpecialCharacters,
     sleep,
-    isNumericString
+    isNumericString,
+    OpenNoneElement
 } from "src/Util/method.tsx";
 import { Sidebar, listItemStyle } from "src/styles/Layouts.tsx"
 import { RedSmallBtn } from "src/styles/Button.tsx"
@@ -118,7 +119,21 @@ const MyList = () => {
             if (await SubmitTokenCheck(UserInfo.Name, UserInfo.Token) === 200) {
                 await setIsVisible(true);
                 //APIを呼び出し、本のリストを取得する
-                setApiDatas(await MyListGetLFB(UserInfo.Name, UserInfo.Token))
+                const GetList=async()=>{
+                    const state=await MyListGetLFB(UserInfo.Name, UserInfo.Token);
+                    if (state.length > 0) {
+                        //データがある
+                        setApiDatas(state);
+                        return;
+                    } else {
+                        //データがない
+                        //無い旨を伝える
+                        OpenNoneElement("none");
+                        return;
+                    }
+                };
+                await GetList();
+
                 return;
             } else {
                 navigate("/");
@@ -139,6 +154,7 @@ const MyList = () => {
                 <div style={{ display: 'flex', textAlign: "center", }}>
                     <Sidebar Name={UserInfo.Name} Token={UserInfo.Token} />
                     <div style={{ flex: 1, padding: '20px', paddingTop: '150px', }}>
+                    <a className="nonedata" style={{ display: 'none'}} id="none" >データがありません</a>
                         <span className="header">
                             <Text size="xl" weight={700} mb="lg">
                                 <h2>MyLists　　　<Button style={RedSmallBtn} onClick={DeleteClick}><span className="header">削除</span></Button></h2>

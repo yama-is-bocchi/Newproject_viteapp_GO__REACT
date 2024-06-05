@@ -87,3 +87,11 @@ export async function ChangeElementMs(ElementId:string,ChangeStr:string,Time:Int
   await CautionComment(ElementId,tempTextcontent);
   return;
 }
+
+//引数のidを持つ要素のdisplayを""にして開示する
+export function OpenNoneElement(ID:string){
+  let element = document.getElementById(ID);
+  if (element == null) return;
+  element.style.display = '';;
+  return;
+}

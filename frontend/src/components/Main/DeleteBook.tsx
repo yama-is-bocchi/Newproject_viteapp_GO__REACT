@@ -19,7 +19,8 @@ import {
     PasswordChecker,
     hasSpecialCharacters,
     sleep,
-    isNumericString
+    isNumericString,
+    OpenNoneElement
 } from "src/Util/method.tsx";
 import { Sidebar, listItemStyle } from "src/styles/Layouts.tsx"
 import { RedSmallBtn } from "src/styles/Button.tsx"
@@ -126,8 +127,23 @@ const DeleteBook = () => {
             //userinfo.tokenを渡してトークンAPIを呼び出す
             if (await SubmitTokenCheck(UserInfo.Name, UserInfo.Token) === 200) {
                 await setIsVisible(true);
-                //APIを呼び出し、本のリストを取得する
-                setApiDatas(await GetBookList(UserInfo.Name, UserInfo.Token))
+                 //成功
+                //API呼び出し
+                const GetList=async()=>{
+                    const state=await GetBookList(UserInfo.Name, UserInfo.Token);
+                    if (state.length > 0) {
+                        //データがある
+                        setApiDatas(state);
+                        return;
+                    } else {
+                        //データがない
+                        //無い旨を伝える
+                        OpenNoneElement("none");
+                        return;
+                    }
+                };
+                await GetList();
+
                 return;
             } else {
                 navigate("/");
@@ -146,6 +162,7 @@ const DeleteBook = () => {
                 <div style={{ display: 'flex', textAlign: "center", }}>
                     <Sidebar Name={UserInfo.Name} Token={UserInfo.Token} />
                     <div style={{ flex: 1, padding: '20px', paddingTop: '150px', }}>
+                    <a className="nonedata" style={{ display: 'none'}} id="none" >データがありません</a>
                         <span className="header">
                             <Text size="xl" weight={700} mb="lg">
                                 <h2>削除したいデータを選択してください

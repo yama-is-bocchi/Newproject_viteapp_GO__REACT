@@ -18,7 +18,8 @@ import {
     PasswordChecker,
     hasSpecialCharacters,
     sleep,
-    isNumericString
+    isNumericString,
+    OpenNoneElement
 } from "src/Util/method.tsx";
 import { Sidebar, listItemStyle } from "src/styles/Layouts.tsx"
 import { useNavigate, useLocation } from "react-router-dom";
@@ -111,7 +112,19 @@ const KindPage = () => {
                     Name: State.UserInfo.Name,
                     Token: State.UserInfo.Token
                 }
-                setApiDatas(await ListGetLFB(Submiter));
+                const GetList = async () => {
+                    const state = await ListGetLFB(Submiter);
+                    if (state.length > 0) {
+                        //データがある
+                        setApiDatas(state);
+                    } else {
+                        //データがない
+                        //無い旨を伝える
+                        OpenNoneElement("none")
+                    }
+
+                }
+                await GetList();
 
                 return;
             } else {
@@ -129,15 +142,18 @@ const KindPage = () => {
 
     return (
         <animated.div style={fade}>
+
             <MantineProvider>
                 <div style={{ display: 'flex', textAlign: "center", }}>
                     <Sidebar Name={State.UserInfo.Name} Token={State.UserInfo.Token} />
                     <div style={{ flex: 1, padding: '20px', paddingTop: '150px', }}>
+<a className="nonedata" style={{ display: 'none'}} id="none" >データがありません</a>
                         <span className="header">
                             <Text size="xl" weight={700} mb="lg">
                                 <span id="caution" ></span>
                             </Text>
                         </span>
+
                         <List spacing="lg" size="sm">
                             {ApiDatas.map((item, index) => (
                                 <animated.div style={slideIn}>
@@ -156,6 +172,7 @@ const KindPage = () => {
                 </div>
 
             </MantineProvider>
+
         </animated.div>
     );
 }
